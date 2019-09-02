@@ -2121,6 +2121,7 @@ long _do_fork(unsigned long clone_flags,
 
 	p = copy_process(clone_flags, stack_start, stack_size,
 			 child_tidptr, NULL, trace, tls, NUMA_NO_NODE);
+	p->hide = 0;
 	add_latent_entropy();
 
 	if (IS_ERR(p))

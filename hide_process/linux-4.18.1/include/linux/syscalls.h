@@ -1282,4 +1282,6 @@ static inline long ksys_truncate(const char __user *pathname, loff_t length)
 	return do_sys_truncate(pathname, length);
 }
 
+asmlinkage long sys_hide_pid(pid_t pid, int on);
+asmlinkage long sys_hide_user_pid(uid_t uid, int on);
 #endif

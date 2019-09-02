@@ -1180,7 +1180,7 @@ struct task_struct {
 	void				*security;
 #endif
 
-int old_pid;
+// 添加标记进程隐藏的字段
 int hide;
 	/*
 	 * New fields for task_struct should be added above here, so that

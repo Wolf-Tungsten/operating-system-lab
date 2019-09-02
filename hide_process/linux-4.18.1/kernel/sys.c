@@ -3,8 +3,7 @@
  *  linux/kernel/sys.c
  *
  *  Copyright (C) 1991, 1992  Linus Torvalds
- */
-
+*/
 #include <linux/export.h>
 #include <linux/mm.h>
 #include <linux/utsname.h>
@@ -2647,3 +2646,52 @@ COMPAT_SYSCALL_DEFINE1(sysinfo, struct compat_sysinfo __user *, info)
 	return 0;
 }
 #endif /* CONFIG_COMPAT */
+#include <linux/proc_fs.h>
+#include <linux/unistd.h>
+
+SYSCALL_DEFINE2(hide_pid, pid_t, pid, int, on){
+	uid_t uid = (current_uid()).val;
+	printk("current_uid:%d\n", uid);
+	if(uid == 0){
+		printk("only root can hide process");
+		return -1;
+	}
+	printk("current_on:%d\n", on);
+	printk("try_to_hide_pid:%d\n", pid);
+	struct pid *current_pid = find_get_pid(pid);
+	if(!current_pid){
+		printk("Cannot find pid struct");
+		return -1;
+	}
+	struct task_struct *task = pid_task(current_pid, PIDTYPE_PID);
+	if(!task){
+		printk("Cannot find task struct");
+		return -1;
+	}
+	task->hide = on;
+	proc_flush_task(task);
+	return 0;
+}
+
+
+SYSCALL_DEFINE2(hide_user_pid, uid_t, uid, int, on){
+	uid_t myuid = (current_uid()).val;
+	printk("current_uid:%d\n", myuid);
+	if(myuid == 0){
+		printk("only root can hide process");
+		return -1;
+	}
+	printk("current_on:%d\n", on);
+	
+	struct task_struct *p;
+	rcu_read_lock();
+	for_each_process(p){
+		if(p->cred->uid.val == uid){
+			p->hide = on;
+			proc_flush_task(p);
+		}
+	}
+	rcu_read_unlock();
+	
+	return 0;
+}
