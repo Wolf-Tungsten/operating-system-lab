@@ -29,6 +29,10 @@ static void dispatcher();
 extern void cd();
 
 extern void cmd_pipe();
+
+extern void cmd_out_redirect();
+extern void cmd_in_redirect();
+
 %}
 
 %%
@@ -105,7 +109,45 @@ static void dispatcher(){
             } else if(flag == 0) {
                 ;
             } else {
-                perror("Only support 1 pipe in a command");
+                perror("Only support 1 '|' in a command");
+                return;
+            }
+        }
+    }
+
+    if(g_argc > 2){
+        for(int i = 1; i < g_argc; i++){
+            int flag = 0;
+            if(strcmp(g_argv[i], ">") == 0){
+                flag++;
+            }
+            if(flag == 1){
+                cmd_out_redirect();
+                flag = 0;
+                return;
+            } else if(flag == 0) {
+                ;
+            } else {
+                perror("Only support 1 '>' in a command");
+                return;
+            }
+        }
+    }
+
+    if(g_argc > 2){
+        for(int i = 1; i < g_argc; i++){
+            int flag = 0;
+            if(strcmp(g_argv[i], "<") == 0){
+                flag++;
+            }
+            if(flag == 1){
+                cmd_in_redirect();
+                flag = 0;
+                return;
+            } else if(flag == 0) {
+                ;
+            } else {
+                perror("Only support 1 '<' in a command");
                 return;
             }
         }

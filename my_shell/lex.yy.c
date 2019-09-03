@@ -468,8 +468,12 @@ static void dispatcher();
 extern void cd();
 
 extern void cmd_pipe();
-#line 472 "lex.yy.c"
-#line 473 "lex.yy.c"
+
+extern void cmd_out_redirect();
+extern void cmd_in_redirect();
+
+#line 476 "lex.yy.c"
+#line 477 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -686,9 +690,9 @@ YY_DECL
 		}
 
 	{
-#line 34 "parse.lex"
+#line 38 "parse.lex"
 
-#line 692 "lex.yy.c"
+#line 696 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -747,26 +751,26 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 35 "parse.lex"
+#line 39 "parse.lex"
 {add_arg(yytext);}
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 36 "parse.lex"
+#line 40 "parse.lex"
 {dispatcher(); reset_args();}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 37 "parse.lex"
+#line 41 "parse.lex"
 ;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 38 "parse.lex"
+#line 42 "parse.lex"
 ECHO;
 	YY_BREAK
-#line 770 "lex.yy.c"
+#line 774 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1771,7 +1775,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 38 "parse.lex"
+#line 42 "parse.lex"
 
 
 static void add_arg(const char* arg){
@@ -1842,7 +1846,45 @@ static void dispatcher(){
             } else if(flag == 0) {
                 ;
             } else {
-                perror("Only support 1 pipe in a command");
+                perror("Only support 1 '|' in a command");
+                return;
+            }
+        }
+    }
+
+    if(g_argc > 2){
+        for(int i = 1; i < g_argc; i++){
+            int flag = 0;
+            if(strcmp(g_argv[i], ">") == 0){
+                flag++;
+            }
+            if(flag == 1){
+                cmd_out_redirect();
+                flag = 0;
+                return;
+            } else if(flag == 0) {
+                ;
+            } else {
+                perror("Only support 1 '>' in a command");
+                return;
+            }
+        }
+    }
+
+    if(g_argc > 2){
+        for(int i = 1; i < g_argc; i++){
+            int flag = 0;
+            if(strcmp(g_argv[i], "<") == 0){
+                flag++;
+            }
+            if(flag == 1){
+                cmd_in_redirect();
+                flag = 0;
+                return;
+            } else if(flag == 0) {
+                ;
+            } else {
+                perror("Only support 1 '<' in a command");
                 return;
             }
         }
