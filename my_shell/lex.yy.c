@@ -466,8 +466,10 @@ static void exec_simple_cmd();
 static void dispatcher();
 
 extern void cd();
-#line 470 "lex.yy.c"
-#line 471 "lex.yy.c"
+
+extern void cmd_pipe();
+#line 472 "lex.yy.c"
+#line 473 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -684,9 +686,9 @@ YY_DECL
 		}
 
 	{
-#line 32 "parse.lex"
+#line 34 "parse.lex"
 
-#line 690 "lex.yy.c"
+#line 692 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -745,26 +747,26 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 33 "parse.lex"
+#line 35 "parse.lex"
 {add_arg(yytext);}
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 34 "parse.lex"
+#line 36 "parse.lex"
 {dispatcher(); reset_args();}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 35 "parse.lex"
+#line 37 "parse.lex"
 ;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 36 "parse.lex"
+#line 38 "parse.lex"
 ECHO;
 	YY_BREAK
-#line 768 "lex.yy.c"
+#line 770 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1769,7 +1771,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 36 "parse.lex"
+#line 38 "parse.lex"
 
 
 static void add_arg(const char* arg){
@@ -1824,8 +1826,29 @@ static int my_yyinput(char* buf, int max){
 static void dispatcher(){
     if(strcmp(g_argv[0], "cd")  == 0){
         cd();
-    } else {
-        exec_simple_cmd();
+        return;
+    } 
+
+    if(g_argc > 2){
+        for(int i = 1; i < g_argc; i++){
+            int flag = 0;
+            if(strcmp(g_argv[i], "|") == 0){
+                flag++;
+            }
+            if(flag == 1){
+                cmd_pipe();
+                flag = 0;
+                return;
+            } else if(flag == 0) {
+                ;
+            } else {
+                perror("Only support 1 pipe in a command");
+                return;
+            }
+        }
     }
+    
+    
+    exec_simple_cmd();
 }
 

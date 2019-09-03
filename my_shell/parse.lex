@@ -27,6 +27,8 @@ static void exec_simple_cmd();
 static void dispatcher();
 
 extern void cd();
+
+extern void cmd_pipe();
 %}
 
 %%
@@ -87,7 +89,28 @@ static int my_yyinput(char* buf, int max){
 static void dispatcher(){
     if(strcmp(g_argv[0], "cd")  == 0){
         cd();
-    } else {
-        exec_simple_cmd();
+        return;
+    } 
+
+    if(g_argc > 2){
+        for(int i = 1; i < g_argc; i++){
+            int flag = 0;
+            if(strcmp(g_argv[i], "|") == 0){
+                flag++;
+            }
+            if(flag == 1){
+                cmd_pipe();
+                flag = 0;
+                return;
+            } else if(flag == 0) {
+                ;
+            } else {
+                perror("Only support 1 pipe in a command");
+                return;
+            }
+        }
     }
+    
+    
+    exec_simple_cmd();
 }
